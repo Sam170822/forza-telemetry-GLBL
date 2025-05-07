@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ElectronCgi.DotNet;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace ForzaCore
 {
@@ -244,7 +245,12 @@ namespace ForzaCore
             IEnumerable<object> values = data.GetType()
                  .GetProperties()
                  .Where(p => p.CanRead)
-                 .Select(p => p.GetValue(packet, null));
+                 .Select(p => {
+             var value = p.GetValue(packet, null);
+             return value is IFormattable formattable 
+                 ? formattable.ToString(null, CultureInfo.InvariantCulture) 
+                 : value?.ToString();
+         });
 
             StringBuilder sb = new StringBuilder();
             sb.AppendJoin(',', values);
